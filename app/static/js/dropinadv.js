@@ -16,7 +16,7 @@ async function startCheckout() {
       clientKey,
       environment: "test",
       locale: "en_US",
-      countryCode: "NL",
+      countryCode: "GB",
       showPayButton: true,
       translations: {
         "en-US": {
@@ -44,7 +44,7 @@ async function startCheckout() {
         holderNameRequired: true,
         amount: {
           value: 10000,
-          currency: "EUR",
+          currency: "GBP",
         },
         placeholders: {
           cardNumber: "1234 5678 9012 3456",

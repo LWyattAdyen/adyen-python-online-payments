@@ -6,7 +6,7 @@ from flask import Flask, render_template, send_from_directory, request
 import json
 
 
-from main.sessions import adyen_sessions
+from app.main.adyenbackend import *
 from main.config import *
 
 
@@ -40,6 +40,41 @@ def create_app():
         host_url = request.host_url 
 
         return adyen_sessions(host_url)
+    
+    # paymentMethods API call (prep Advanced flow)
+    @app.route('/api/paymentMethods', methods=['POST'])
+    def paymentMethods():
+        return adyen_paymentMethods()
+
+    # getOrderState API call (prep Giftcard flow)
+    @app.route('/getOrderState', methods=['POST'])
+    def getAmount():
+        return adyen_getOrderState()
+
+    # paymentMethods balance API call (prep giftcard flow)
+    @app.route('/api/paymentMethods/balance', methods=['POST'])
+    def paymentMethodsBalance():
+        state = request.data
+        return adyen_paymentMethodsBalance(state)
+
+    # Orders API call (prep giftcard flow)
+    @app.route('/api/orders', methods=['POST'])
+    def orders():
+        state = request.data
+        return adyen_orders(state)
+
+    # Orders Cancel API call (prep giftcard flow)
+    @app.route('/api/orders/cancel', methods=['POST'])
+    def orders_cancel():
+        state = request.data
+        return adyen_orders_cancel(state)
+
+    # Payments API call (prep Advanced flow)
+    @app.route('/api/payments', methods=['POST'])
+    def payments():
+        state = request.data
+        host_url = request.host_url
+        return adyen_payments(state, host_url)
 
     @app.route('/result/success', methods=['GET'])
     def checkout_success():

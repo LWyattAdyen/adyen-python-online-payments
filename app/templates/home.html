@@ -15,19 +15,21 @@
         </div>
         <ul class="integration-list">
             <li class="integration-list-item">
-                <a class="integration-list-item-link" href="{{ url_for('cart', integration="dropin") }}">
+                <a class="integration-list-item-link" href="{{ url_for('cart', integration="dropinsessions") }}">
                     <div class="title-container">
-                        <p class="integration-list-item-title">Drop-in</p>
+                        <p class="integration-list-item-title">Drop-in Sessions</p>
                     </div>
                 </a>
             </li>
+            
             <li class="integration-list-item">
-                <a class="integration-list-item-link" href="{{ url_for('cart', integration="card") }}">
+                <a class="integration-list-item-link" href="{{ url_for('cart', integration="dropinadv") }}">
                     <div class="title-container">
-                        <p class="integration-list-item-title">Card</p>
+                        <p class="integration-list-item-title">Drop-in Advanced</p>
                     </div>
                 </a>
             </li>
+            <!--
             <li class="integration-list-item">
                 <a class="integration-list-item-link" href="{{ url_for('cart', integration="ideal") }}">
                     <div class="title-container">
@@ -56,6 +58,7 @@
                     </div>
                 </a>
             </li>
+        -->
         </ul>
     </div>
 {% endblock %}
