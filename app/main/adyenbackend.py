@@ -11,7 +11,7 @@ cartTotal = 10000
 orderPaid = 0
 gcBalance = -1
 numGiftcards = 0
-currency = "GBP"
+currency = "EUR"
 
 
 def adyen_sessions(host_url):
@@ -23,12 +23,15 @@ def adyen_sessions(host_url):
     
     request = {}
 
-    request['amount'] = {"value": "10000", "currency": "GBP"}  # amount in minor units
-    request['reference'] = f"Reference {uuid.uuid4()}"  # provide your unique payment reference
+    request['amount'] = {"value": cartTotal, "currency": currency}  # amount in minor units
+    # request['reference'] = f"Reference {uuid.uuid4()}"  # provide your unique payment reference
     # set redirect URL required for some payment methods
     request['returnUrl'] = f"{host_url}handleShopperRedirect?shopperOrder=myRef"
-    request['countryCode'] = "GB"
+    request['countryCode'] = "ES"
     request['shopperInteraction'] = "Ecommerce"
+    request['shopperReference'] = "MyShopper1"
+    request['storePaymentMethodMode'] = "askForConsent"
+    request['recurringProcessingModel'] = "CardOnFile"
 
     # set lineItems: required for some payment methods (ie Klarna)
     request['lineItems'] = \
@@ -47,7 +50,7 @@ def adyen_sessions(host_url):
 def adyen_getOrderState():
     global cartTotal, orderPaid, gcBalance, numGiftcards
     # init all global values, this API call is only made when instantiating the checkout
-    cartTotal = 1000
+    cartTotal = 10000
     gcBalance = -1
     orderPaid = 0
     numGiftcards = 0
@@ -86,6 +89,9 @@ def adyen_paymentMethods():
 def adyen_payments(state, host_url):
 
     format_state = json.loads(state)
+
+    print(format_state)
+    print("\n")
 
     adyen = Adyen.Adyen()
     adyen.payment.client.xapikey = get_adyen_api_key()
@@ -129,20 +135,27 @@ def adyen_payments(state, host_url):
     request['amount'] = {"value": remainderAmount,"currency": currency}
     request['shopperReference'] = "shopperReference"
     request['paymentMethod'] = format_state['data']['paymentMethod']
-    request['returnUrl'] = f"{host_url}/redirect"
-    request['shopperReference'] = "MKShopperRef"
-    request['recurringProcessingModel'] = "CardOnFile"
-    request['storePaymentMethod'] = "true"
+    request['returnUrl'] = f"{host_url}handleShopperRedirect?shopperOrder=myRef"
     request['shopperEmail'] = "liam.wyatt@adyen.com"
     request['countryCode'] = "NL"
-    # request['additionalAmount'] = {"value": 100,"currency": currency}
+    request['shopperInteraction'] = "Ecommerce"
+    request['channel'] = "Web"
+    request['origin'] = f"https://glorious-space-happiness-9776ppvpprwhvvv-8080.app.github.dev/"
+    request['authenticationData'] = {}
+    request['authenticationData']['threeDSRequestData'] = {}
+    request['authenticationData']['attemptAuthentication'] = "always"
+    # request['authenticationData']['threeDSRequestData']['nativeThreeDS'] = "preferred"
+    request['threeDS2RequestData'] = {}
+    request['threeDS2RequestData']['threeDSRequestorChallengeInd'] = "04"
 
     if format_state['data']['paymentMethod']['type'] == "scheme":
         request['browserInfo'] = format_state['data']['browserInfo']
 
+
     paymentsResponse = adyen.checkout.payments_api.payments(request)
     formatted_payments = json.dumps((json.loads(paymentsResponse.raw_response)))
-
+    print(formatted_payments)
+    print("\n")
     return formatted_payments
 
 def adyen_paymentsdetails(state):

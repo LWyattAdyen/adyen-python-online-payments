@@ -6,7 +6,7 @@ from flask import Flask, render_template, send_from_directory, request
 import json
 
 
-from app.main.adyenbackend import *
+from main.adyenbackend import *
 from main.config import *
 
 
@@ -37,9 +37,7 @@ def create_app():
     # Perform /sessions call
     @app.route('/api/sessions', methods=['POST'])
     def sessions():
-        host_url = request.host_url 
-
-        return adyen_sessions(host_url)
+        return adyen_sessions("https://glorious-space-happiness-9776ppvpprwhvvv-8080.app.github.dev/")
     
     # paymentMethods API call (prep Advanced flow)
     @app.route('/api/paymentMethods', methods=['POST'])
@@ -73,8 +71,7 @@ def create_app():
     @app.route('/api/payments', methods=['POST'])
     def payments():
         state = request.data
-        host_url = request.host_url
-        return adyen_payments(state, host_url)
+        return adyen_payments(state, "https://glorious-space-happiness-9776ppvpprwhvvv-8080.app.github.dev/")
 
     @app.route('/result/success', methods=['GET'])
     def checkout_success():

@@ -1,5 +1,5 @@
 const clientKey = document.getElementById("clientKey").innerHTML;
-const { AdyenCheckout, Dropin } = window.AdyenWeb;
+const { AdyenCheckout, ApplePay } = window.AdyenWeb;
 
 // Used to finalize a checkout call in case of redirect
 const urlParams = new URLSearchParams(window.location.search);
@@ -65,7 +65,7 @@ function handleServerResponse(res, component) {
 async function startCheckout() {
 
     // get /paymentMethods API response
-    paymentMethodsResponse = await callServer("/api/paymentMethods");
+    // paymentMethodsResponse = await callServer("/api/paymentMethods");
 
     orderState = await callServer("/getOrderState");
     amount = orderState['amount']
@@ -74,22 +74,10 @@ async function startCheckout() {
         clientKey,
         amount: amount,
         environment: "test",
-        showPayButton: true,
         locale: "en-US",
         countryCode: "GB",
-        paymentMethodsResponse: paymentMethodsResponse,
-        onOrderCancel: async function(state) {
-            //order cancel API call here
-            cancelResponse = await callServer("/api/orders/cancel", state);
-            // this call resets the original order state and returns the original full amount, in my integration.
-            orderState = await callServer("/getOrderState");
-            amount = orderState['amount']
-            // this resets the drop-in state in the front end
-            paymentMethodsResponse = await callServer("/api/paymentMethods");
-            await adyenCheckout.update({order: null, amount: amount, paymentMethodsResponse: paymentMethodsResponse});
-        },
+        // paymentMethodsResponse: paymentMethodsResponse,
         onSubmit: async (state, component) => {
-            console.log(state)
             res = await callServer("/api/payments", state)
             if (res.order && res.order.remainingAmount.value > 0) {
                 paymentMethodsResponse = await callServer("/api/paymentMethods");
@@ -98,7 +86,6 @@ async function startCheckout() {
             } else {
                 handleServerResponse(res, component);
             }
-
         },
         onAdditionalDetails: async (state, component) => {
             res = callServer("/api/payments/details", state);
@@ -111,58 +98,17 @@ async function startCheckout() {
             console.error(error.name, error.message, error.stack, component);
         }
     };
-    const paymentMethodsConfiguration = {
-            card: {
-                 /* clickToPayConfiguration: {
-                    merchantDisplayName: "Human Holdings LLC",
-                    shopperEmail: "liam.wyatt@adyen.com"
-                },*/
-                hasHolderName: true,
-                holderNameRequired: false,
-                enableStoreDetails: false,
-                billingAddressRequired: false,
-
-
-                onBinLookup: function(state) {
-                    console.log("Bin Lookup:")
-                    console.log(state)
-                },
-                onBinValue: function(state) {
-                    console.log("Bin Value:")
-                    console.log(state)
-                },
-                onFieldValid: function(state) {
-                    console.log("Field Valid:")
-                    console.log(state)
+    const applePayConfiguration = {
+                buttonColor: "black",
+                configuration: {
+                    merchantId: '000000000311099',
+                    merchantName: 'BananaStand'
                 }
-            },
-            applepay: {
-                buttonColor: "white",
-                brands: null,
-                supportedNetworks: ["amex", "masterCard"]
-
-            },
-            //storedCard: {
-            //    hideCVC: true
-            //},
-            giftcard: {
-                pinRequired: false,
-                onBalanceCheck: function(resolve, reject, data) {
-                    BalanceResponse = callServer("/api/paymentMethods/balance", data)
-                    resolve(BalanceResponse)
-                },
-                onOrderRequest: function(resolve, reject, data) {
-                    OrderResponse = callServer("/api/orders")
-                    resolve(OrderResponse)
-                }
-            }
-        };
+            };
 
     // Start the AdyenCheckout and mount the element onto the 'payment' div.
     const adyenCheckout = await AdyenCheckout(configuration);
-    const dropin = new Dropin(adyenCheckout, {
-        paymentMethodsConfiguration: paymentMethodsConfiguration
-    }).mount("#dropin-container");
+    const applepay = new ApplePay(adyenCheckout, applePayConfiguration).mount("#dropin-container");
 }
 
 startCheckout();

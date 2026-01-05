@@ -27,6 +27,16 @@ async function startCheckout() {
         console.info("onPaymentCompleted", result, component);
         handleOnPaymentCompleted(result, component);
       },
+      beforeSubmit: (result, component, actions) => {
+        if (result.paymentMethod.storedPaymentMethodId) {
+          //result.paymentMethod.shopperInteraction = "ContAuth";
+          console.log(result);
+          actions.resolve(result);
+        }
+        else {
+          actions.resolve(result);
+        }
+      },
       onPaymentFailed: (result, component) => {
         console.info("onPaymentFailed", result, component);
         handleOnPaymentFailed(result, component);
@@ -54,6 +64,9 @@ async function startCheckout() {
           holderName: "J. Smith",
         },
       },
+      paypal: {
+        enableMessages: true
+      }
     };
 
     // Start the AdyenCheckout and mount the element onto the 'payment' div.
